@@ -95,6 +95,135 @@
         }
 
         // lightmap to be pasted around the tetromino as it falls
-        
+        let light = { x: 0, y: 0 };
+        let light_mask = [
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,4,4,0,0,0,0,0,0,
+            0,0,0,2,3,4,5,5,4,3,2,0,0,0,
+            0,0,2,3,4,5,6,6,5,4,3,2,0,0,
+            0,2,3,4,5,6,7,7,6,5,4,3,2,0,
+            0,3,4,5,6,7,8,8,7,6,5,4,3,0,
+            0,4,5,6,7,8,9,9,8,7,6,5,4,0,
+            0,4,5,6,7,8,9,9,8,7,6,5,4,0,
+            0,3,4,5,6,7,8,8,7,6,5,4,3,0,
+            0,2,3,4,5,6,7,7,6,5,4,3,2,0,
+            0,0,2,3,4,5,6,6,5,4,3,2,0,0,
+            0,0,0,2,3,4,5,5,4,3,2,0,0,0,
+            0,0,0,0,0,0,4,4,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        ];
+
+        // draw the lightmap
+        function draw_light() {
+            let index = 0; 
+            for (let y = 0; y < 14; y++) {
+                for (let x = 0; x < 14; x++, index++) {
+                    let posx = x + position.x;
+                    let posy = y + position.y;
+                    let square = document.getElementById("fog_x" + (posx - 6) + "y" + (posy - 6));
+                    if (square) {
+                        let type = light_mask[index];
+                        if (type == 9) square.style.opacity = '0';
+                        if (type == 8) square.style.opacity = '0.1';
+                        if (type == 7) square.style.opacity = '0.2';
+                        if (type == 6) square.style.opacity = '0.3';
+                        if (type == 5) square.style.opacity = '0.4';
+                        if (type == 4) square.style.opacity = '0.5';
+                        if (type == 3) square.style.opacity = '0.7';
+                        if (type == 2) square.style.opacity = '0.8';
+                        if (type == 1) square.style.opacity = '0.9';
+                        if (type == 0) square.style.opacity = '1.0';
+                    }
+                }
+            }
+        }
+
+        // current tetromino position
+        let position = {x: (width / 2) - 1, y: -3};
+
+        let current = [0,0,0,0,0,0,0,0,0];
+        let next = [0,0,0,0,0,0,0,0,0];
+
+        // Select next tetromino
+        function make_random() {
+            // Select random tetromino
+            let index = Math.floor((Math.random() * tetrominos.length));
+            // Copy tetromino into current array (avoid reference assignment)
+            return [...tetrominos[ index ]];
+        }
+
+        // Update "next" box
+        function update_next() {
+            for (let i = 0; i < 9; i++) {
+                let square = document.getElementById("next_" + i);
+                next[i] == 1 ? square.style.backgroundColor = color.tetromino : 
+                square.style.backgroundColor = color.background;
+            }
+        }
+
+        function reset() {
+            paste();                // paste current tetromino onto the well
+            clear_row();            // clear rows if any
+            current = [...next];    // swap current and next tetromino
+            next = make_random();   // generate next tetromino
+            update_next();          // Update "next" box
+
+            // reset current position to top and middle of the well
+            position.x = parseInt(width/2) - 1;
+            position.y = -3
+
+            reset_fog();
+        }
+
+        function reset_fog() {
+            for (let y=0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let square = document.getElementById("fog_x" + x + "y" + y);
+                    if (square)
+                        square.style.opacity = 1;
+                }
+            }
+        }
+
+        let test = false; 
+        window.onload = function() {
+
+            setInterval( (T) => { process_highlights() }, 3 );
+
+            current = make_random();
+            next = make_random();
+            update_next();
+
+            // Animation
+            setInterval(() => {
+
+                erase();
+
+                // fall();
+
+                draw();
+
+                draw_light();
+
+            }, 15);
+
+            // Keyboard input
+            document.addEventListener("keydown", (e) => {
+
+                let key_code = e.keyCode;
+
+                erase();
+
+                // Left
+                if (key_code == 37) {
+                    if (will_collide(dir.LEFT)) {
+                        reset();
+                    } else position.x -= 1
+                } 
+
+                // Right
+                
+            });
+        }
     </script>
 </head>
