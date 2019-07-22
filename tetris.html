@@ -1,0 +1,100 @@
+<head>
+    <script type="module">
+
+        let color = { background: '#5c2a3b',
+                            wall: '#d83c66',
+                           solid: '#49b5ab',
+                       tetromino: '#e97539'};
+
+        let width = 52;
+        let height = 36;
+        let well = new Array(height);
+        let fog = new Array(height);
+        const square_size = 8;
+
+        let A = [0,0,1,0,0,1,0,1,1];
+        let B = [1,0,0,1,0,0,1,1,0];
+        let C = [0,0,0,0,1,0,1,1,1];
+        let D = [0,0,0,0,1,1,1,1,0];
+        let E = [0,0,0,1,1,0,0,1,1];
+        let F = [1,1,0,1,1,0,0,0,0];
+        let G = [0,0,0,1,1,1,0,0,0];
+
+        // Array containing all tetrominos
+        let tetrominos = [A, B, C, D, E, F, G];
+
+        // Reset well to all 0's
+        for (let y = 0; y < width; y++)
+            well[y] = new Array( height ).fill(0);
+        
+        // Mark bottom
+        for (let x = 0; x < width; x++)
+            well[x][height - 1] = 2;
+
+        // Mark Walls
+        for (let y = 0; y < height; y++) {
+            well[0][y] = 1;
+            well[width - 1][y] = 1;
+        }
+
+        // fog
+        for (let y = 0; y < height; y++)
+            fog[y] = new Array( height ).fill(0);
+
+        // Generate well
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let square = document.createElement("div");
+                square.setAttribute("id", "square_x" + x + "y" + y);
+                square.style.position = "absolute";
+                square.style.left = x * square_size + "px";
+                square.style.top = y * square_size + "px";
+                square.style.width = square_size + "px";
+                square.style.height = square_size + "px";
+                square.style.zIndex = 0;
+                let block_type = well[x][y];
+                if (block_type == 0) square.style.background = color.background;
+                if (block_type == 1) square.style.background = color.wall;
+                if (block_type == 2) square.style.background = color.wall;
+                document.body.appendChild(square);
+            }
+        }
+
+        // Generate fog
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                let square = document.createElement("div");
+                square.setAttribute("id", "fog_x" + x + "y" + y);
+                square.style.position = "absolute";
+                square.style.display = "block"; 
+                square.style.left = x * square_size + "px";
+                square.style.top = y * square_size + "px";
+                square.style.width = square_size + "px";
+                square.style.height = square_size + "px";
+                square.style.zIndex = 1;
+                let block_type = well[x][y];
+                square.style.background = "black";
+                document.body.appendChild(square);
+            }
+        }
+
+        // Create "next" placeholder
+        let index = 0;
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++, index++) {
+                let square = document.createElement("div");
+                square.setAttribute("id", "next_" + index);
+                square.style.position = "absolute";
+                square.style.left = 455 + (x * square_size) + "px";
+                square.style.top = 0 + y * square_size + "px";
+                square.style.width = square_size + "px";
+                square.style.height = square_size + "px";
+                square.style.background = color.background;
+                document.body.appendChild(square);
+            }
+        }
+
+        // lightmap to be pasted around the tetromino as it falls
+        
+    </script>
+</head>
