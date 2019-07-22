@@ -222,8 +222,152 @@
                 } 
 
                 // Right
-                
+                if (key_code == 39) {
+                    if (will_collide(dir.RIGHT)) {
+                        reset();
+                    } else position.x += 1
+                }
+
+                // Down
+                if (key_code == 40) {
+                    if (will_collide(dir.DOWN)) {
+                        reset();
+                    } else position.y += 1
+                }
+
+                if (key_code == 38) { position.y -= 1 }
+
+                // Rotate
+                if (key_code == 90) { rotate_left() }
+                if (key_code == 88) { rotate_right(); }
+
+                draw();
+
             });
         }
+
+        // "paste" current block onto the well
+        function paste() {
+            let index = 0; 
+            if (position.x >= 0 && position.x <= width - 1) {
+                if (position.y >= -3 && position.y <= height -1) {
+                    for (let y = position.y; y < position.y + 3; y++) {
+                        for (let x = position.x; x < position.x + 3; x++, index++) {
+                            if (current[index] == 1) {
+                                let square = document.getElementById("square_x" + x + "y" + y);
+                                if (square) {
+                                    well[x][y] = 3;
+                                    square.style.backgroundColor = color.solid;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function erase() {
+            let index = 0;
+            if (position.x >= 0 && position.x <= width -1) {
+                if (position.y >= -3 && position.y <= height -1) {
+                    for (let y = position.y; y < position.y + 3; y++) {
+                        for (let x = position.x; x < position.x + 3; x++, index++) {
+                            if (current[index] == 1) {
+                                let square = document.getElementById("square_x" + x + "y" + y);
+                                if (square) {
+                                    if (true) { // well[x] && well[y]
+                                        well[x][y] = 0;
+                                        if (x == 0 || x == width - 1 ) { } else {
+                                            square.style.backgroundColor = color.background;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // scan a horizontal row and count the number of solid squares on it
+        function scan_row(y) {
+
+            let row_data = [];
+
+            let total = 0;
+
+            for (let x = 0; x < width; x++) {
+                row_data[x] = well[x][y]; // copy this row
+                if (well[x][y] != 0) total++; // count non-empty (solid) squares only
+            }
+
+            return [total, row_data];
+        }
+
+        // check if a row needs to be cleared
+        function clear_row() {
+
+            // placeholder for new rows
+            let placeholder = [];
+
+            // how many rows cleared?
+            let rows_cleared = 0;
+
+            // scan the well one row at a time and capture any non-filled rows in placeholder
+            // (except for the last row)
+            for (let y = 0; y < height - 1; y++) {
+                let start = y * width; 
+                let scanned = scan_row(y);
+                let total = scanned[0];
+                let row_data = scanned[1];
+                // skip all horizontal rows that are completely filled
+                if (total != width) {
+                    // memorize only uncleared rows
+                    let len = placeholder.length; 
+                    placeholder[len] = row_data;
+                } else {
+                    start_highlight(y);
+                    rows_cleared++;
+                }
+            }
+
+            console.log("rows_cleared = ", rows_cleared);
+            console.log("placeholder = ");
+            console.log(placeholder);
+
+            // if at least one row was cleared, update the well
+            if (rows_cleared > 0) {
+                // clear the well, except last row (well's bottom)
+                for (let y = 0; y < height - 1; y++) {
+                    // clear all except walls ([0] and [width -1])
+                    for (let x = 1; x < width - 1; x++) {
+                        well[x][y] = 0;
+                        // paint empty square
+                        let square = document.getElementById("square_x" + x + "y" + y);
+                        if (square) square.style.backgroundColor = color.background;
+                    }
+                }
+
+                // paste captured placeholder rows onto the well from bottom up
+                let r = height - 2;
+                for (let i = placeholder.length - 1; i > 0; i--) {
+                    let row = placeholder[i];
+                    console.log("placeholder[" + i + "]", row);
+                    for (let x = 0; x < width; x++) {
+                        if (row[x] != 0) {
+                            well[x][r] = 3;
+                            if (x != 0 && x != width -1) {
+                                let square = document.getElementById("square_x" + x + "y" + r);
+                                if (square) square.style.backgroundColor = color.solid;
+                            }
+                        }
+                    }
+                    r--;
+                }
+                console.log("well = ");
+                console.log(well);
+            }
+        }
+        
     </script>
 </head>
