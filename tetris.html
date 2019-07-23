@@ -368,6 +368,120 @@
                 console.log(well);
             }
         }
-        
+
+        function draw() {
+            let index = 0;
+            if (position.x >= 0 && position.x <= width - 1) {
+                if (position.y >= -3 && position.y <= height - 1) {
+                    for (let y = position.y; y < position.y + 3; y++) {
+                        for (let x = position.x; x < position.x + 3; x++, index++) {
+                            if (current[index] == 1) {
+                                let square = document.getElementById("square_x" + x + "y" + y);
+                                if (square) {
+                                    if (true) { // well[x] && well[y]
+                                        square.style.backgroundColor = color.tetromino; 
+                                        // Don't erase walls
+                                        if (x == 0 || x == width - 1 || y == height - 1) {
+                                            square.style.backgroundColor = "red";
+                                        } else {
+                                            well[x][y] = 2;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        const dir = { LEFT: 0, RIGHT: 1, DOWN: 2 };
+
+        function will_collide(direction) {
+            let posx = position.x;
+            let posy = position.y;
+            if (direction == dir.LEFT) posx--;
+            if (direction == dir.RIGHT) posx++;
+            if (direction == dir.DOWN) posy++;
+            let index = 0;
+            if (posx >= 0 && posx <= width - 1) {
+                if (posy >= -3 && posy <= height - 1) {
+                    for (let y = posy; y < posy + 3; y++) {
+                        for (let x = posx; x < posx + 3; x++, index++) {
+                            if (current[index] == 1) {
+                                let square = document.getElementById("square_x" + x + "y" + y);
+                                if (square) {
+                                    // if (well[x] && well[y]) {
+                                        if (well[x][y] == 3 || well[x][y] == 1 || x == 0 || x == -1 || y == height -1)
+                                            return true;
+                                    // }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function fall() {
+            position.y += 1;
+        }
+
+        function rotate_left() {
+            let copy = [...current];
+            let map = [2,5,8,1,4,7,0,3,6];
+            current.fill(0);
+            for (let i = 0; i < 9; i++)
+                current[ii] = copy[map[i]];
+        }
+
+        function rotate_right() {
+            let copy = [...current];
+            let map = [6,3,0,7,4,1,8,5,2];
+            current.fill(0);
+            for (let i = 0; i < 9; i++)
+                current[i] = copy[map[i]];
+        }
+
+        // create a highlight for each height level
+        let highlights = [];
+        for (let i = 0; i < height - 1; i++) {
+            highlights[i] = { state: 1, opacity: 1.0 };
+            let highlight = document.createElement("div");
+            highlight.setAttribute("id", "highlight_" + i);
+            highlight.style.position = "absolute"; 
+            highlight.style.left = square_size + "px";
+            highlight.style.top = i * square_size + "px";
+            highlight.style.width = (square_size * width) - (square_size * 2) + "px";
+            highlight.style.height = square_size + "px";
+            highlight.style.zIndex = 1;
+            highlight.style.pointerEvents = "none";
+            highlight.style.opacity = highlights[i].opacity; 
+            highlight.style.background = "white";
+            document.body.appendChild( highlight );
+        }
+
+        function start_highlight(i) {
+            highlights[i] = { state: 1, opacity: 1 };
+        }
+
+        function process_highlights() {
+            for (let i = 0; i < height; i++) {
+                if (highlights[i])
+                if (highlights[i].state == 1) {
+                    if (highlights[i].opacity > 0.0) {
+                        highlights[i].opacity -= 0.01;
+                        if (document.getElementById("highlight_" + 1))
+                            document.getElementById("highlight_" + i).style.opacity = highlights[i].opacity;
+                    } else { // reset this highlight
+                        highlights[i].state = 0;
+                        highlights[i].opacity = 0;
+                    }
+                }
+            }
+        }
     </script>
 </head>
+
+<body style = "display: block; position: relative; background: black; margin-left: 100px; margin-top: 50px;"></body>
